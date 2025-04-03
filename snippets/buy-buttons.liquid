@@ -99,6 +99,13 @@
             </span>
             {%- render 'loading-spinner' -%}
           </button>
+            <p class="available_quantity_text">
+              {% if product.selected_or_first_available_variant.inventory_quantity >= 5 %}
+                Available!
+              {% else %}
+                Low stock
+              {% endif %}
+            </p>
           {%- if show_dynamic_checkout -%}
             {{ form | payment_button }}
           {%- endif -%}
