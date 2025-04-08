@@ -52,6 +52,7 @@
             picker_type: picker_type
           %}
         </fieldset>
+        
       {%- else -%}
         <div class="product-form__input product-form__input--dropdown">
           <label class="form__label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
@@ -87,8 +88,64 @@
       {%- endif -%}
     {%- endfor -%}
 
-    <script type="application/json" data-selected-variant>
-      {{ product.selected_or_first_available_variant | json }}
-    </script>
+    <p id="size-description" class="size-description"></p>
+
+<script type="application/json" data-selected-variant>
+  {{ product.selected_or_first_available_variant | json }}
+</script>
+
+<script id="size-descriptions-json" type="application/json">
+  {
+    "s": {{ product.variants.first.metafields.custom.small | json }},
+    "m": {{ product.variants.first.metafields.custom.medium | json }},
+    "l": {{ product.variants.first.metafields.custom.large | json }}
+  }
+</script>
+
+<script>
+(function() {
+  let sizeDescriptions = {};
+  const descriptionText = document.getElementById('size-description');
+
+  function loadDescriptions() {
+    const raw = document.getElementById('size-descriptions-json');
+    if (!raw) return;
+
+    try {
+      sizeDescriptions = JSON.parse(raw.textContent);
+      console.log('[Loaded sizeDescriptions]', sizeDescriptions);
+    } catch (e) {
+      console.error('Failed to parse size descriptions JSON:', e);
+    }
+  }
+
+  function updateDescription(){
+    const radios = document.querySelectorAll('input[type="radio"][name^="Shoe size"]');
+    const selectedRadio = Array.from(radios).find(radio => radio.checked);
+    if (!selectedRadio ) return;
+
+    const sizeKey = selectedRadio.value.toLowerCase();
+    const description = sizeDescriptions[sizeKey];
+    descriptionText.textContent = description || '';
+
+    console.log('[Update] size:', sizeKey, 'description:', description);
+  }
+
+  function initSizeDescription() {
+    loadDescriptions();
+    updateDescription();
+
+    document.addEventListener('change', (e) => {
+      if (e.target.matches('input[type="radio"][name^="Shoe size"]')) {
+        setTimeout(updateDescription, 100);
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initSizeDescription);
+  document.addEventListener('shopify:section:load', initSizeDescription);
+
+})();
+</script>
   </variant-selects>
 {%- endunless -%}

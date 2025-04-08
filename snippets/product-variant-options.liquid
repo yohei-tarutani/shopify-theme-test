@@ -89,6 +89,7 @@
       {% if option_disabled %}
         class="disabled"
       {% endif %}
+       data-variant-id="{{ value.variant.id }}"
       {{ input_dataset }}
     >
     <label for="{{ input_id }}">
